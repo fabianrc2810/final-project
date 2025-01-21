@@ -4,6 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks && chmod +x .githooks/*",
     "test": "vitest"
   },
   "lint-staged": {
