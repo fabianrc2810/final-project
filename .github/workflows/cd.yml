@@ -33,24 +33,25 @@ jobs:
         docker push fabianrc2810/final-project:latest
         docker push fabianrc2810/final-project:${{ github.sha }}
 
-    # Paso 5: Desplegar a Kubernetes
-    - name: Setup Kubernetes CLI
-      uses: azure/setup-kubectl@v3
-      with:
-        version: 'latest'
-
+    # Paso 5: Configurar el contexto de Kubernetes
     - name: Configure Kubernetes Context
-      env:
-        KUBECONFIG: ${{ secrets.KUBECONFIG }}
       run: |
         echo "${{ secrets.KUBECONFIG_CONTENT }}" > kubeconfig.yaml
         export KUBECONFIG=$(pwd)/kubeconfig.yaml
+        kubectl get nodes
 
+    # Paso 6: Aplicar el archivo de Deployment
+    - name: Apply Kubernetes Deployment
+      run: |
+        kubectl apply -f k8s/deployment.yml
+
+    # Paso 7: Actualizar el Deployment con la nueva imagen
     - name: Update Kubernetes Deployment
       run: |
-        kubectl set image deployment/final-project final-project=fabianrc2810/final-project:${{ github.sha }} --record
-        kubectl rollout status deployment/final-project
+        kubectl set image deployment/final-project-deployment final-project-container=fabianrc2810/final-project:${{ github.sha }} --record
+        kubectl rollout status deployment/final-project-deployment
 
+    # Paso 8: Verificar los pods desplegados
     - name: Verify Deployment
       run: |
         kubectl get pods -l app=final-project
