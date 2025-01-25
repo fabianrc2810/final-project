@@ -1,4 +1,4 @@
-name: CD
+name: CD Pipeline
 
 on:
   push:
@@ -6,28 +6,51 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
+    # Paso 1: Clonar el repositorio
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
+    # Paso 2: Iniciar sesión en Docker Hub
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
       with:
-        node-version: '20'
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
 
-    - name: Install dependencies
-      run: npm install
-
-    - name: Run integration tests
-      run: npm run test:integration
-
-    - name: Deploy to Kubernetes
-      env:
-        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+    # Paso 3: Construir y etiquetar la imagen Docker
+    - name: Build Docker image
       run: |
-        echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
-        kubectl apply -f k8s/deployment.yaml
-        kubectl apply -f k8s/service.yaml
+        docker build -t fabianrc2810/final-project:latest .
+        docker tag fabianrc2810/final-project:latest fabianrc2810/final-project:${{ github.sha }}
+
+    # Paso 4: Subir la imagen a Docker Hub
+    - name: Push Docker image
+      run: |
+        docker push fabianrc2810/final-project:latest
+        docker push fabianrc2810/final-project:${{ github.sha }}
+
+    # Paso 5: Desplegar a Kubernetes
+    - name: Setup Kubernetes CLI
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+
+    - name: Configure Kubernetes Context
+      env:
+        KUBECONFIG: ${{ secrets.KUBECONFIG }}
+      run: |
+        echo "${{ secrets.KUBECONFIG_CONTENT }}" > kubeconfig.yaml
+        export KUBECONFIG=$(pwd)/kubeconfig.yaml
+
+    - name: Update Kubernetes Deployment
+      run: |
+        kubectl set image deployment/hello-world-api hello-world-api=fabianrc2810/final-project:${{ github.sha }} --record
+        kubectl rollout status deployment/hello-world-api
+
+    - name: Verify Deployment
+      run: |
+        kubectl get pods -l app=hello-world-api
