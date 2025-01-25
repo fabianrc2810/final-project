@@ -1,17 +1,14 @@
 # Usar la imagen base de Node.js
-FROM node:20
+FROM node:current-alpine3.20
 
 # Crear directorio de trabajo
 WORKDIR /app
 
 # Copiar package.json y package-lock.json
-COPY package*.json ./
+COPY . .
 
 # Instalar dependencias
 RUN npm install
-
-# Copiar el resto del código
-COPY . .
 
 # Exponer el puerto
 EXPOSE 3000
