@@ -1,17 +1,20 @@
-# Usar la imagen base de Node.js
-FROM node:current-alpine3.20
+# Use the official Node.js 20 image as the base image
+FROM node:20
 
-# Crear directorio de trabajo
-WORKDIR /app
+# Set the working directory
+WORKDIR /usr/src/app
 
-# Copiar package.json y package-lock.json
-COPY . .
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-# Instalar dependencias
+# Install dependencies
 RUN npm install
 
-# Exponer el puerto
+# Copy the rest of the application code
+COPY . .
+
+# Expose the port the app runs on
 EXPOSE 3000
 
-# Comando para iniciar la aplicación
+# Command to run the application
 CMD ["node", "index.js"]
