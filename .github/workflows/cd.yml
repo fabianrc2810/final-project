@@ -1,4 +1,4 @@
-name: CD Pipeline
+name: Minikube CD Pipeline
 
 on:
   push:
@@ -14,44 +14,39 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    # Paso 2: Iniciar sesión en Docker Hub
-    - name: Login to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-
-    # Paso 3: Construir y etiquetar la imagen Docker
-    - name: Build Docker image
+    # Paso 2: Instalar dependencias necesarias
+    - name: Install Dependencies
       run: |
-        docker build -t fabianrc2810/final-project:latest .
-        docker tag fabianrc2810/final-project:latest fabianrc2810/final-project:${{ github.sha }}
+        sudo apt-get update -y
+        sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+        sudo apt-get install -y conntrack socat ebtables ethtool
 
-    # Paso 4: Subir la imagen a Docker Hub
-    - name: Push Docker image
+    # Paso 3: Instalar kubectl
+    - name: Install kubectl
       run: |
-        docker push fabianrc2810/final-project:latest
-        docker push fabianrc2810/final-project:${{ github.sha }}
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
 
-    # Paso 5: Configurar el contexto de Kubernetes
-    - name: Configure Kubernetes Context
+    # Paso 4: Instalar Minikube
+    - name: Install Minikube
       run: |
-        echo "${{ secrets.KUBECONFIG_CONTENT }}" > kubeconfig.yaml
-        export KUBECONFIG=$(pwd)/kubeconfig.yaml
-        kubectl get nodes
+        curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        sudo install minikube-linux-amd64 /usr/local/bin/minikube
 
-    # Paso 6: Aplicar el archivo de Deployment
+    # Paso 5: Iniciar Minikube
+    - name: Start Minikube
+      run: |
+        sudo minikube start --driver=docker --kubernetes-version=v1.23.0
+        sudo minikube status
+
+    # Paso 6: Aplicar el Deployment
     - name: Apply Kubernetes Deployment
       run: |
         kubectl apply -f k8s/deployment.yml
-
-    # Paso 7: Actualizar el Deployment con la nueva imagen
-    - name: Update Kubernetes Deployment
-      run: |
-        kubectl set image deployment/final-project-deployment final-project-container=fabianrc2810/final-project:${{ github.sha }} --record
         kubectl rollout status deployment/final-project-deployment
 
-    # Paso 8: Verificar los pods desplegados
-    - name: Verify Deployment
+    # Paso 7: Verificar que los Pods están corriendo
+    - name: Verify Pods
       run: |
         kubectl get pods -l app=final-project
