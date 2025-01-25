@@ -14,9 +14,6 @@ jobs:
 
     steps:
       
-    - name: Login to DockerHub Registry
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login docker.pkg.github.com -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-    
     - name: Checkout code
       uses: actions/checkout@v2
 
@@ -49,6 +46,6 @@ jobs:
         COMMIT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
         DATE=$(date +'%Y%m%d')
         IMAGE_TAG="$DATE-$COMMIT_SHA"
-        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+        echo "${{ secrets.DOCKER_PASSWORD }}" | docker login docker.pkg.github.com -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
         docker tag fabianrc2810/final-project:$IMAGE_TAG fabianrc2810/final-project:$IMAGE_TAG
         docker push fabianrc2810/final-project:$IMAGE_TAG
