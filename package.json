@@ -4,12 +4,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "prepare": "git config core.hooksPath .githooks && chmod +x .githooks/*",
     "test": "vitest",
     "lint": "eslint ."
-  },
-  "lint-staged": {
-    "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": "oxlint"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +17,6 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.6.0",
-    "oxlint": "^0.15.6",
     "supertest": "^7.0.0",
     "vitest": "^3.0.2"
   },
