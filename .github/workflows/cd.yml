@@ -48,9 +48,9 @@ jobs:
 
     - name: Update Kubernetes Deployment
       run: |
-        kubectl set image deployment/hello-world-api hello-world-api=fabianrc2810/final-project:${{ github.sha }} --record
-        kubectl rollout status deployment/hello-world-api
+        kubectl set image deployment/final-project final-project=fabianrc2810/final-project:${{ github.sha }} --record
+        kubectl rollout status deployment/final-project
 
     - name: Verify Deployment
       run: |
-        kubectl get pods -l app=hello-world-api
+        kubectl get pods -l app=final-project
