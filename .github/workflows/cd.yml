@@ -1,4 +1,4 @@
-name: CD
+name: Minikube CD Pipeline
 
 on:
   push:
@@ -6,25 +6,47 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
+    # Paso 1: Clonar el repositorio
     - name: Checkout code
-      uses: actions/checkout@v2
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '14'
-    
-    - name: Install dependencies
-      run: npm install
-    
-    - name: Deploy to Kubernetes
-      env:
-        KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+      uses: actions/checkout@v3
+
+    # Paso 2: Instalar dependencias necesarias
+    - name: Install Dependencies
       run: |
-        echo "$KUBE_CONFIG_DATA" | base64 --decode > $HOME/.kube/config
-        kubectl apply -f k8s/deployment.yaml
-        kubectl apply -f k8s/service.yaml
+        sudo apt-get update -y
+        sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+        sudo apt-get install -y conntrack socat ebtables ethtool
+
+    # Paso 3: Instalar kubectl
+    - name: Install kubectl
+      run: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+
+    # Paso 4: Instalar Minikube
+    - name: Install Minikube
+      run: |
+        curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+        sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+    # Paso 5: Iniciar Minikube
+    - name: Start Minikube
+      run: |
+        sudo minikube start --driver=docker --kubernetes-version=v1.23.0
+        sudo minikube status
+
+    # Paso 6: Aplicar el Deployment
+    - name: Apply Kubernetes Deployment
+      run: |
+        kubectl apply -f k8s/deployment.yml
+        kubectl rollout status deployment/final-project-deployment
+
+    # Paso 7: Verificar que los Pods están corriendo
+    - name: Verify Pods
+      run: |
+        kubectl get pods -l app=final-project
