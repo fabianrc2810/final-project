@@ -76,10 +76,10 @@ jobs:
     needs: [build-and-push-docker-image]
 
     steps:
-      - name: Checkout final-project' repository
+      - name: Checkout final-project-argocd repository
         uses: actions/checkout@v3
         with:
-          repository: 'fabianrc2810/final-project'
+          repository: 'fabianrc2810/final-project-argocd'
           ref: 'main'
           token: ${{ github.token }}
       - name: setup git config
@@ -87,7 +87,7 @@ jobs:
           git config --global user.email "fabianhr.fr@gmail.com"
           git config --global user.name "fabianrc2810"
           echo ${{ github.sha }}
-          sed -i "s#${{ github.actor }}.*#${{ github.actor }}/final-project:${{ github.sha }}#g" k8s/deployment.yaml
+          sed -i "s#${{ github.actor }}.*#${{ github.actor }}/final-project:${{ github.sha }}#g" deployment.yaml
           git add -A
           git commit -m "Update deployment image for - ${{ github.sha }}"
       - run: echo ${{ github }}
