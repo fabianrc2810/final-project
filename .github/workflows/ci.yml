@@ -60,7 +60,7 @@ jobs:
         with:
 
           context: ./
-          tags: /
+          tags: |
             fabianrc2810/final-project:${{ github.sha }}
             ghcr.io/fabianrc2810/final-project:${{ github.sha }}
 
