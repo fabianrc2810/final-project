@@ -8,13 +8,13 @@
     "test": "vitest",
     "lint": "eslint ."
   },
-  "lint-staged": {
-    "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": "oxlint"
-  },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "CI",
+    "CD"
+  ],
+  "author": "Fabian Reyes",
   "license": "ISC",
-  "description": "",
+  "description": "Project for CI/CD",
   "devDependencies": {
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",

@@ -1,2 +1,5 @@
 node_modules
 dist
+result
+nixos.qcow2
+keys
