@@ -51,7 +51,7 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
-          context: ./ 
+          context: ./
           tags: fabianrc2810/final-project:${{ github.sha }}
           push: ${{ github.ref == 'refs/heads/main' }}
 
@@ -63,11 +63,24 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-and-push-docker-image]
     steps:
-    - name: Run semantice release
-      run: |
-        npx semantic-release
-      env: 
-        GITHUB_TOKEN: ${{ secrets.G_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run semantic release
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.G_TOKEN }}
 
   update-manifest-stage:
     name: Update manifest stage
@@ -81,6 +94,7 @@ jobs:
           repository: 'fabianrc2810/final-project-argocd'
           ref: 'main'
           token: ${{ secrets.G_TOKEN }}
+
       - name: Setup git config
         run: |
           git config --global user.email "fabianhr.fr@gmail.com"
@@ -89,5 +103,7 @@ jobs:
           sed -i "s#${{ github.actor }}.*#${{ github.actor }}/final-project:${{ github.sha }}#g" deployment.yml
           git add -A
           git commit -m "Update deployment image for - ${{ github.sha }}"
+
       - run: echo ${{ github }}
+
       - run: git push origin main
