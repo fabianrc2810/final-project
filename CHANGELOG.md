@@ -1,3 +1,15 @@
+# [1.1.0](https://github.com/fabianrc2810/final-project/compare/v1.0.0...v1.1.0) (2025-02-01)
+
+
+### Bug Fixes
+
+* fixing test ([50fda1f](https://github.com/fabianrc2810/final-project/commit/50fda1f35daf39f6f6814d6beffc1eb2a78bb82a))
+
+
+### Features
+
+* new message of the API ([22fc1a4](https://github.com/fabianrc2810/final-project/commit/22fc1a44b986cc04fd54fb1b68e738fc9dd3b9c2))
+
 # 1.0.0 (2025-02-01)
 
 
