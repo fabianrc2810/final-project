@@ -6,6 +6,6 @@ describe('GET /hello', () => {
   test('responds with Hello World!', async () => {
     const res = await request(app).get('/hello');
     expect(res.status).toBe(200);
-    expect(res.text).toBe('Hello Hello mother fucker!');
+    expect(res.text).toBe('Hello mother fucker!');
   });
 });
